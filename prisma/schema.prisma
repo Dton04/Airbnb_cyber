@@ -55,6 +55,7 @@ model NguoiDung {
   birth_day String?    @db.VarChar(50)
   gender    String?    @db.VarChar(20)
   role      String?    @db.VarChar(50)
+  avatar    String?    @db.VarChar(255)
   deletedBy Int        @default(0)
   isDeleted Boolean    @default(false)
   deletedAt DateTime?  @db.Timestamp(0)

@@ -7,6 +7,7 @@ import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { RedisCacheModule } from './common/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { LocationModule } from './modules/location/location.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserModule } from './modules/user/user.module';
     RedisCacheModule,
     AuthModule,
     UserModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
