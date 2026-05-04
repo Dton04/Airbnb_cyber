@@ -12,9 +12,9 @@ export class LocationController {
   constructor(private readonly locationService: LocationService) { }
 
   @Get()
-  // @UseInterceptors(CacheInterceptor)
-  // @CacheKey('locations_list')
-  // @CacheTTL(60000)
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('locations_list')
+  @CacheTTL(6000)
   @ApiOperation({ summary: 'Lấy danh sách vị trí' })
   findAll() {
     return this.locationService.findAll();

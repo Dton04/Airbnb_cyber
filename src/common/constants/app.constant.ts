@@ -10,7 +10,7 @@ export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
 export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
-
+export const REDIS_URL = process.env.REDIS_URL;
 console.log(
   '\n',
   {
@@ -24,6 +24,7 @@ console.log(
     CLOUDINARY_API_KEY: CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET: CLOUDINARY_API_SECRET,
 
+    REDIS_URL: REDIS_URL,
   },
   '\n',
 );

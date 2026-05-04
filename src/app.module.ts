@@ -8,6 +8,9 @@ import { RedisCacheModule } from './common/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { LocationModule } from './modules/location/location.module';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { APP_GUARD } from '@nestjs/core';
+import { ResponseSuccessInterceptor } from './common/interceptors/response.success.interceptor';
 
 @Module({
   imports: [
@@ -22,6 +25,16 @@ import { LocationModule } from './modules/location/location.module';
     LocationModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: LoggingInterceptor
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ResponseSuccessInterceptor
+    }
+  ],
 })
-export class AppModule {}
+export class AppModule { }
