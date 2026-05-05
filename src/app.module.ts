@@ -11,6 +11,7 @@ import { LocationModule } from './modules/location/location.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { APP_GUARD } from '@nestjs/core';
 import { ResponseSuccessInterceptor } from './common/interceptors/response.success.interceptor';
+import { RoomModule } from './modules/room/room.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ResponseSuccessInterceptor } from './common/interceptors/response.succe
     AuthModule,
     UserModule,
     LocationModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [
