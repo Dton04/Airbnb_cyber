@@ -5,6 +5,8 @@ import { LocationService } from './location.service';
 import { CreateLocationDto, UpdateLocationDto } from './dto/location.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('ViTri')
 @Controller('api/vi-tri')
@@ -22,8 +24,9 @@ export class LocationController {
 
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Thêm vị trí mới' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  @ApiOperation({ summary: 'Thêm vị trí mới (ADMIN)' })
   create(@Body() createLocationDto: CreateLocationDto) {
     return this.locationService.create(createLocationDto);
   }
@@ -56,8 +59,9 @@ export class LocationController {
 
   @Delete(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Xóa vị trí' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Xóa vị trí (chỉ dành cho ADMIN)' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.locationService.remove(id);
   }

@@ -11,7 +11,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @ApiTags('PhongThue')
 @Controller('api/phong-thue')
 export class RoomController {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(private readonly roomService: RoomService) { }
 
   @Get()
   @UseInterceptors(CacheInterceptor)
@@ -57,25 +57,28 @@ export class RoomController {
 
   @Put(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Cập nhật phòng' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Cập nhật phòng (chỉ dành cho ADMIN)' })
   update(@Param('id', ParseIntPipe) id: number, @Body() updateRoomDto: UpdateRoomDto) {
     return this.roomService.update(id, updateRoomDto);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Xóa phòng' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Xóa phòng (chỉ dành cho ADMIN)' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.roomService.remove(id);
   }
 
   @Post('upload-hinh-phong')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @UseInterceptors(FileInterceptor('formFile'))
-  @ApiOperation({ summary: 'Upload hình ảnh cho phòng' })
+  @ApiOperation({ summary: 'Upload hình ảnh cho phòng (chỉ dành cho ADMIN)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
