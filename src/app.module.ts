@@ -12,6 +12,8 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { APP_GUARD } from '@nestjs/core';
 import { ResponseSuccessInterceptor } from './common/interceptors/response.success.interceptor';
 import { RoomModule } from './modules/room/room.module';
+import { BookingModule } from './modules/booking/booking.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { RoomModule } from './modules/room/room.module';
     UserModule,
     LocationModule,
     RoomModule,
+    BookingModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [
