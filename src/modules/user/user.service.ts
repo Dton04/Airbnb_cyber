@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CloudinaryService } from '../../common/cloudinary/cloudinary.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -132,17 +132,25 @@ export class UserService {
       });
    }
 
-   async uploadAvatar(userId: number, file: Express.Multer.File) {
-      const user = await this.prisma.nguoiDung.findFirst({ where: { id: userId, isDeleted: false } });
+   async uploadAvatar(id: number, file: Express.Multer.File) {
+      const user = await this.prisma.nguoiDung.findFirst({
+         where: {
+            id,
+            isDeleted: false
+         }
+      });
       if (!user) throw new NotFoundException('User not found');
-
+      //xóa ảnh cũ nếucó
+      if (user.avatar) {
+         await this.cloudinaryService.deleteFile(user.avatar);
+      }
       const uploadResult = await this.cloudinaryService.uploadFile(file, 'airbnb/avatars');
 
       const updatedUser = await this.prisma.nguoiDung.update({
-         where: { id: userId },
+         where: { id },
          data: { avatar: uploadResult.url },
          select: {
-            id: true, name: true, email: true, phone: true, birth_day: true, gender: true, role: true, avatar: true,
+            id: true, name: true, email: true, role: true, avatar: true,
          },
       });
 

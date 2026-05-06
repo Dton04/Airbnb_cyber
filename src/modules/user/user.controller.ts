@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query, UseGuards, UseInterceptors, UploadedFile, ParseIntPipe, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Query, UseGuards, UseInterceptors, UploadedFile, ParseIntPipe, Request, MaxFileSizeValidator, FileTypeValidator, ParseFilePipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { UserService } from './user.service';
@@ -77,13 +77,12 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('formFile'))
-  @ApiOperation({ summary: 'Upload avatar người dùng' })
+  @ApiOperation({ summary: 'Upload avatar cho chính người dùng đang đăng nhập' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        userId: { type: 'number' },
         formFile: {
           type: 'string',
           format: 'binary',
@@ -92,9 +91,16 @@ export class UserController {
     },
   })
   uploadAvatar(
-    @Body('userId', ParseIntPipe) userId: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // Max 5MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }), // Chỉ nhận ảnh
+        ],
+      }),
+    ) file: Express.Multer.File,
+    @Request() req,
   ) {
-    return this.userService.uploadAvatar(userId, file);
+    return this.userService.uploadAvatar(req.user.id, file);
   }
 }
