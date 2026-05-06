@@ -13,7 +13,6 @@ export class AuthService {
   ) { }
 
   async signup(dto: SignupDto) {
-    // Check if user exists
     const existingUser = await this.prisma.nguoiDung.findFirst({
       where: { email: dto.email, isDeleted: false },
     });
@@ -30,6 +29,9 @@ export class AuthService {
         email: dto.email,
         pass_word: hashedPassword,
         phone: dto.phone,
+        birth_day: dto.birth_day,
+        gender: dto.gender,
+        role: dto.role || 'USER',
       },
     });
 

@@ -90,15 +90,23 @@ export class UserService {
       return user;
    }
 
-   async update(id: number, dto: UpdateUserDto) {
-      const user = await this.prisma.nguoiDung.findFirst({ where: { id, isDeleted: false } });
-      if (!user) throw new NotFoundException('User not found');
+   async update(id: number, dto: UpdateUserDto, reqUser: any) {
+
+      const user = await this.prisma.nguoiDung.findFirst(
+         {
+            where:
+               { id, isDeleted: false }
+         });
+      if (!user) throw new NotFoundException('User không tồn tại');
+
+      if (reqUser.id != id && reqUser.role != 'ADMIN')
+         throw new BadRequestException('Bạn không có quyền thực hiện thao tác này');
 
       if (dto.email && dto.email !== user.email) {
          const emailExists = await this.prisma.nguoiDung.findFirst({
             where: { email: dto.email, isDeleted: false },
          });
-         if (emailExists) throw new BadRequestException('Email already in use');
+         if (emailExists) throw new BadRequestException('Email đã tồn tại');
       }
 
       const updatedUser = await this.prisma.nguoiDung.update({

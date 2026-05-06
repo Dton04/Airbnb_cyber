@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query, UseGuards, UseInterceptors, UploadedFile, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Query, UseGuards, UseInterceptors, UploadedFile, ParseIntPipe, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { UserService } from './user.service';
@@ -65,8 +65,12 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Cập nhật thông tin người dùng' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @Request() req
+  ) {
+    return this.userService.update(id, updateUserDto, req.user);
   }
 
   @Post('upload-avatar')
