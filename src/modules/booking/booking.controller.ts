@@ -7,7 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('DatPhong')
 @Controller('api/dat-phong')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(private readonly bookingService: BookingService) { }
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách đặt phòng' })

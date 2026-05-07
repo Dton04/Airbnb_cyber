@@ -4,7 +4,7 @@ import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private mapToResponse(datPhong: any) {
     if (!datPhong) return datPhong;

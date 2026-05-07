@@ -1,4 +1,13 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateCommentDto } from './create-comment.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { Max, Min } from 'class-validator';
 
-export class UpdateCommentDto extends PartialType(CreateCommentDto) {}
+export class UpdateCommentDto {
+   @ApiProperty()
+   @ApiProperty({ example: 'Nội dung cập nhật' })
+   noiDung: string;
+
+   @ApiProperty({ example: 4 })
+   @Min(1)
+   @Max(5)
+   saoBinhLuan: number;
+}
