@@ -141,4 +141,31 @@ export class CommentService {
       content: deletedComment,
     };
   }
+  async findCommentByRoomId(maPhong: number) {
+    const comments = await this.prisma.binhLuan.findMany({
+      where: {
+        ma_phong: maPhong,
+        isDeleted: false
+      },
+      include: {
+        Phong: {
+          select: {
+            ten_phong: true,
+          }
+        },
+        NguoiDung: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    });
+    if (comments.length === 0) {
+      throw new NotFoundException('Không có bình luận nào');
+    }
+    return {
+      message: 'Lấy danh sách bình luận thành công',
+      content: comments,
+    };
+  }
 }

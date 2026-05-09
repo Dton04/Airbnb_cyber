@@ -21,11 +21,6 @@ export class CreateBookingDto {
   @IsInt()
   @IsNotEmpty()
   soLuongKhach: number;
-
-  @ApiProperty({ example: 1 })
-  @IsInt()
-  @IsNotEmpty()
-  maNguoiDat: number;
 }
 
-export class UpdateBookingDto extends PartialType(CreateBookingDto) {}
+export class UpdateBookingDto extends PartialType(CreateBookingDto) { }

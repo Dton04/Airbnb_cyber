@@ -47,4 +47,9 @@ export class CommentController {
   remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.commentService.remove(id, req.user);
   }
+  @Get('lay-binh-luan-theo-phong/:maPhong')
+  @ApiOperation({ summary: 'Lấy danh sách bình luận theo phòng' })
+  findCommentByRoomId(@Param('maPhong', ParseIntPipe) maPhong: number) {
+    return this.commentService.findCommentByRoomId(maPhong);
+  }
 }

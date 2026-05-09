@@ -9,8 +9,8 @@ export class CreateRoomDto {
 
   @ApiProperty({ example: 4 })
   @IsInt()
-  @IsOptional()
-  khach?: number;
+  @IsNotEmpty()
+  khach: number;
 
   @ApiProperty({ example: 2 })
   @IsInt()
@@ -88,4 +88,4 @@ export class CreateRoomDto {
   maViTri: number;
 }
 
-export class UpdateRoomDto extends PartialType(CreateRoomDto) {}
+export class UpdateRoomDto extends PartialType(CreateRoomDto) { }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, ParseIntPipe, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { BookingService } from './booking.service';
 import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
@@ -19,8 +19,8 @@ export class BookingController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Thêm đặt phòng mới' })
-  create(@Body() createBookingDto: CreateBookingDto) {
-    return this.bookingService.create(createBookingDto);
+  create(@Body() createBookingDto: CreateBookingDto, @Request() req) {
+    return this.bookingService.create(createBookingDto, req.user);
   }
 
   @Get('lay-theo-nguoi-dung/:MaNguoiDung')
@@ -43,8 +43,8 @@ export class BookingController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Cập nhật đặt phòng' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateBookingDto: UpdateBookingDto) {
-    return this.bookingService.update(id, updateBookingDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateBookingDto: UpdateBookingDto, @Request() req) {
+    return this.bookingService.update(id, updateBookingDto, req.user.id);
   }
 
   @Delete(':id')
