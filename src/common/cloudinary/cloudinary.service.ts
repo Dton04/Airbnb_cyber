@@ -28,7 +28,12 @@ export class CloudinaryService {
           transformation: [{ quality: 'auto', fetch_format: 'auto' }],
         },
         (error, result) => {
-          if (error || !result) return reject(error || new Error('Upload failed'));
+          if (error || !result) {
+            if (error instanceof Error) {
+              return reject(error);
+            }
+            return reject(new Error(typeof error === 'string' ? error : 'Upload failed'));
+          }
           resolve({ url: result.secure_url, public_id: result.public_id });
         },
       );
