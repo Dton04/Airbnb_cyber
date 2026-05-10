@@ -11,6 +11,10 @@ export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
 export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 export const REDIS_URL = process.env.REDIS_URL;
+
+export const EMAIL_USER = process.env.EMAIL_USER;
+export const EMAIL_PASS = process.env.EMAIL_PASS;
+
 console.log(
   '\n',
   {
@@ -25,6 +29,9 @@ console.log(
     CLOUDINARY_API_SECRET: CLOUDINARY_API_SECRET,
 
     REDIS_URL: REDIS_URL,
+    
+    EMAIL_USER: EMAIL_USER,
+    EMAIL_PASS: EMAIL_PASS,
   },
   '\n',
 );

@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailerService: MailerService,
+  ) { }
 
   private mapToResponse(datPhong: any) {
     if (!datPhong) return datPhong;
@@ -77,6 +81,34 @@ export class BookingService {
         ma_nguoi_dat: reqUser.id,
       },
     });
+
+    // Lấy thông tin user để gửi mail
+    const user = await this.prisma.nguoiDung.findUnique({
+      where: { id: reqUser.id }
+    });
+
+    if (user?.email) {
+      try {
+        await this.mailerService.sendMail({
+          to: user.email,
+          subject: 'Xác nhận đặt phòng Airbnb thành công',
+          html: `
+            <h2>Xin chào ${user.name || 'bạn'},</h2>
+            <p>Bạn đã đặt phòng <strong>${phong.ten_phong}</strong> thành công trên hệ thống Airbnb!</p>
+            <ul>
+              <li><strong>Ngày đến:</strong> ${new Date(ngayDen).toLocaleDateString('vi-VN')}</li>
+              <li><strong>Ngày đi:</strong> ${new Date(ngayDi).toLocaleDateString('vi-VN')}</li>
+              <li><strong>Số khách:</strong> ${soLuongKhach} người</li>
+              <li><strong>Tổng giá dự kiến:</strong> ${phong.gia_tien ? phong.gia_tien + ' $' : 'Liên hệ'} / đêm</li>
+            </ul>
+            <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi.</p>
+          `,
+        });
+      } catch (error) {
+        console.error('Lỗi khi gửi email xác nhận:', error.message);
+      }
+    }
+
     return {
       message: 'Đặt phòng thành công',
       content: this.mapToResponse(newBooking),

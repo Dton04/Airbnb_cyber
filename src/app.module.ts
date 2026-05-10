@@ -14,11 +14,27 @@ import { ResponseSuccessInterceptor } from './common/interceptors/response.succe
 import { RoomModule } from './modules/room/room.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EMAIL_USER, EMAIL_PASS } from './common/constants/app.constant';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: EMAIL_USER,
+          pass: EMAIL_PASS,
+        },
+      },
+      defaults: {
+        from: '"Airbnb Clone" <noreply@airbnb-clone.com>',
+      },
     }),
     PrismaModule,
     CloudinaryModule,
