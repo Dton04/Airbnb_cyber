@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, Query, UseGuards, UseInterceptors, UploadedFile, ParseIntPipe, Request, MaxFileSizeValidator, FileTypeValidator, ParseFilePipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SearchUserDto } from './dto/search-user.dto';
 
 @ApiTags('NguoiDung')
 @Controller('api/users')
@@ -39,14 +40,29 @@ export class UserController {
 
   @Get('phan-trang-tim-kiem')
   @ApiOperation({ summary: 'Phân trang tìm kiếm người dùng' })
-  paginateAndSearch(
-    @Query('pageIndex') pageIndex: string,
-    @Query('pageSize') pageSize: string,
-    @Query('keyword') keyword: string,
-  ) {
-    const page = parseInt(pageIndex) || 1;
-    const size = parseInt(pageSize) || 10;
-    return this.userService.paginateAndSearch(page, size, keyword || '');
+  @ApiQuery({
+    name: 'keyword',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'pageIndex',
+    required: false,
+    example: 1,
+  })
+  paginateAndSearch(@Query() query: SearchUserDto) {
+    const page = parseInt(query.pageIndex || "1");
+    const size = parseInt(query.pageSize || "10");
+
+    return this.userService.paginateAndSearch(
+      page,
+      size,
+      query.keyword || '',
+    );
   }
 
   @Get('search/:TenNguoiDung')
