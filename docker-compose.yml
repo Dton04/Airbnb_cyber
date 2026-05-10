@@ -1,16 +1,4 @@
 services:
-  db:
-    image: mysql:8.0
-    container_name: airbnb-mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-123456}
-      MYSQL_DATABASE: cyber_airbnb
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   redis:
     image: redis:alpine
     container_name: airbnb-redis
@@ -27,12 +15,7 @@ services:
     env_file:
       - .env
     environment:
-      # Cấu hình override lại các URL kết nối để trỏ tới service nội bộ trong mạng Docker, bảo mật mật khẩu
-      DATABASE_URL: "mysql://root:${MYSQL_PASSWORD:-123456}@db:3306/cyber_airbnb?allowPublicKeyRetrieval=true&ssl=false"
+      # REDIS_URL sẽ được override để dùng container nội bộ
       REDIS_URL: "redis://redis:6379"
     depends_on:
-      - db
       - redis
-
-volumes:
-  mysql_data:

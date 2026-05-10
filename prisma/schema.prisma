@@ -5,74 +5,77 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model BinhLuan {
-  id                 Int        @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   ma_phong           Int?
   ma_nguoi_binh_luan Int?
-  ngay_binh_luan     DateTime?  @db.DateTime(0)
-  noi_dung           String?    @db.Text
+  ngay_binh_luan     DateTime? @db.Timestamp(6)
+  noi_dung           String?   @db.Text
   sao_binh_luan      Int?
-  deletedBy          Int        @default(0)
-  isDeleted          Boolean    @default(false)
-  deletedAt          DateTime?  @db.Timestamp(0)
-  createdAt          DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt          DateTime   @default(now()) @db.Timestamp(0)
-  NguoiDung          NguoiDung? @relation(fields: [ma_nguoi_binh_luan], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_bl_nguoidung")
-  Phong              Phong?     @relation(fields: [ma_phong], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_bl_phong")
+  deletedBy          Int       @default(0)
+  isDeleted          Boolean   @default(false)
+  deletedAt          DateTime? @db.Timestamp(6)
+  createdAt          DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt          DateTime  @default(now()) @updatedAt @db.Timestamp(6)
 
-  @@index([ma_nguoi_binh_luan], map: "fk_bl_nguoidung")
-  @@index([ma_phong], map: "fk_bl_phong")
+  NguoiDung NguoiDung? @relation(fields: [ma_nguoi_binh_luan], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Phong     Phong?     @relation(fields: [ma_phong], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([ma_nguoi_binh_luan])
+  @@index([ma_phong])
 }
 
 model DatPhong {
-  id             Int        @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   ma_phong       Int?
-  ngay_den       DateTime?  @db.DateTime(0)
-  ngay_di        DateTime?  @db.DateTime(0)
+  ngay_den       DateTime? @db.Timestamp(6)
+  ngay_di        DateTime? @db.Timestamp(6)
   so_luong_khach Int?
   ma_nguoi_dat   Int?
-  deletedBy      Int        @default(0)
-  isDeleted      Boolean    @default(false)
-  deletedAt      DateTime?  @db.Timestamp(0)
-  createdAt      DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt      DateTime   @default(now()) @db.Timestamp(0)
-  NguoiDung      NguoiDung? @relation(fields: [ma_nguoi_dat], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dp_nguoidung")
-  Phong          Phong?     @relation(fields: [ma_phong], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_dp_phong")
+  deletedBy      Int       @default(0)
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime? @db.Timestamp(6)
+  createdAt      DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @db.Timestamp(6)
 
-  @@index([ma_nguoi_dat], map: "fk_dp_nguoidung")
-  @@index([ma_phong], map: "fk_dp_phong")
+  NguoiDung NguoiDung? @relation(fields: [ma_nguoi_dat], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Phong     Phong?     @relation(fields: [ma_phong], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([ma_nguoi_dat])
+  @@index([ma_phong])
 }
 
 model NguoiDung {
-  id        Int        @id @default(autoincrement())
-  name      String?    @db.VarChar(255)
-  email     String?    @db.VarChar(255)
-  pass_word String?    @db.VarChar(255)
-  phone     String?    @db.VarChar(20)
-  birth_day String?    @db.VarChar(50)
-  gender    String?    @db.VarChar(20)
-  role      String?    @db.VarChar(50)
-  avatar    String?    @db.VarChar(255)
-  deletedBy Int        @default(0)
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?  @db.Timestamp(0)
-  createdAt DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt DateTime   @default(now()) @db.Timestamp(0)
-  BinhLuan  BinhLuan[]
-  DatPhong  DatPhong[]
+  id        Int       @id @default(autoincrement())
+  name      String?   @db.VarChar(255)
+  email     String?   @unique @db.VarChar(255)
+  pass_word String?   @db.VarChar(255)
+  phone     String?   @db.VarChar(20)
+  birth_day String?   @db.VarChar(50)
+  gender    String?   @db.VarChar(20)
+  role      String?   @db.VarChar(50)
+  avatar    String?   @db.VarChar(255)
+  deletedBy Int       @default(0)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime? @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+
+  BinhLuan BinhLuan[]
+  DatPhong DatPhong[]
 }
 
 model Phong {
-  id        Int        @id @default(autoincrement())
-  ten_phong String?    @db.VarChar(255)
+  id        Int       @id @default(autoincrement())
+  ten_phong String?   @db.VarChar(255)
   khach     Int?
   phong_ngu Int?
   giuong    Int?
   phong_tam Int?
-  mo_ta     String?    @db.Text
+  mo_ta     String?   @db.Text
   gia_tien  Int?
   may_giat  Boolean?
   ban_la    Boolean?
@@ -83,18 +86,19 @@ model Phong {
   do_xe     Boolean?
   ho_boi    Boolean?
   ban_ui    Boolean?
-  hinh_anh  String?    @db.VarChar(255)
+  hinh_anh  String?   @db.VarChar(255)
   ma_vi_tri Int?
-  deletedBy Int        @default(0)
-  isDeleted Boolean    @default(false)
-  deletedAt DateTime?  @db.Timestamp(0)
-  createdAt DateTime   @default(now()) @db.Timestamp(0)
-  updatedAt DateTime   @default(now()) @db.Timestamp(0)
-  BinhLuan  BinhLuan[]
-  DatPhong  DatPhong[]
-  ViTri     ViTri?     @relation(fields: [ma_vi_tri], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_phong_vitri")
+  deletedBy Int       @default(0)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime? @db.Timestamp(6)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @default(now()) @updatedAt @db.Timestamp(6)
 
-  @@index([ma_vi_tri], map: "fk_phong_vitri")
+  BinhLuan BinhLuan[]
+  DatPhong DatPhong[]
+  ViTri    ViTri?     @relation(fields: [ma_vi_tri], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([ma_vi_tri])
   @@index([ten_phong])
 }
 
@@ -106,10 +110,11 @@ model ViTri {
   hinh_anh   String?   @db.VarChar(255)
   deletedBy  Int       @default(0)
   isDeleted  Boolean   @default(false)
-  deletedAt  DateTime? @db.Timestamp(0)
-  createdAt  DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt  DateTime  @default(now()) @db.Timestamp(0)
-  Phong      Phong[]
+  deletedAt  DateTime? @db.Timestamp(6)
+  createdAt  DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt  DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+
+  Phong Phong[]
 
   @@index([ten_vi_tri])
 }
