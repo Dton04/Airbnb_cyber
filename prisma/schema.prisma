@@ -95,6 +95,7 @@ model Phong {
   ViTri     ViTri?     @relation(fields: [ma_vi_tri], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_phong_vitri")
 
   @@index([ma_vi_tri], map: "fk_phong_vitri")
+  @@index([ten_phong])
 }
 
 model ViTri {
@@ -109,4 +110,6 @@ model ViTri {
   createdAt  DateTime  @default(now()) @db.Timestamp(0)
   updatedAt  DateTime  @default(now()) @db.Timestamp(0)
   Phong      Phong[]
+
+  @@index([ten_vi_tri])
 }

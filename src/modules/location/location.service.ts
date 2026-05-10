@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CloudinaryService } from '../../common/cloudinary/cloudinary.service';
 import { CreateLocationDto, UpdateLocationDto } from './dto/location.dto';
@@ -8,6 +10,7 @@ export class LocationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   private mapToResponse(viTri: any) {
@@ -37,6 +40,7 @@ export class LocationService {
         hinh_anh: dto.hinhAnh,
       },
     });
+    await this.cacheManager.del('locations_list');
     return this.mapToResponse(newLocation);
   }
 
@@ -49,6 +53,7 @@ export class LocationService {
       data: { isDeleted: true, deletedAt: new Date() },
     });
 
+    await this.cacheManager.del('locations_list');
     return { message: 'Location deleted successfully' };
   }
 
@@ -100,6 +105,7 @@ export class LocationService {
       },
     });
 
+    await this.cacheManager.del('locations_list');
     return this.mapToResponse(updatedLocation);
   }
 
@@ -114,6 +120,7 @@ export class LocationService {
       data: { hinh_anh: uploadResult.url },
     });
 
+    await this.cacheManager.del('locations_list');
     return this.mapToResponse(updatedLocation);
   }
 }

@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CloudinaryService } from '../../common/cloudinary/cloudinary.service';
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto';
@@ -8,6 +10,7 @@ export class RoomService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   private mapToResponse(phong: any) {
@@ -64,6 +67,8 @@ export class RoomService {
         ma_vi_tri: dto.maViTri,
       },
     });
+    
+    await this.cacheManager.del('rooms_list');
     return this.mapToResponse(newRoom);
   }
 
@@ -136,6 +141,7 @@ export class RoomService {
       data: dataToUpdate,
     });
 
+    await this.cacheManager.del('rooms_list');
     return this.mapToResponse(updatedRoom);
   }
 
@@ -148,6 +154,7 @@ export class RoomService {
       data: { isDeleted: true, deletedAt: new Date() },
     });
 
+    await this.cacheManager.del('rooms_list');
     return { message: 'Room deleted successfully' };
   }
 
@@ -162,6 +169,7 @@ export class RoomService {
       data: { hinh_anh: uploadResult.url },
     });
 
+    await this.cacheManager.del('rooms_list');
     return this.mapToResponse(updatedRoom);
   }
 }
