@@ -1,13 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateBookingDto, UpdateBookingDto } from './dto/booking.dto';
-import { MailerService } from '@nestjs-modules/mailer';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class BookingService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mailerService: MailerService,
+    @InjectQueue('email-queue') private readonly emailQueue: Queue,
   ) { }
 
   private mapToResponse(datPhong: any) {
@@ -88,8 +89,10 @@ export class BookingService {
     });
 
     if (user?.email) {
-      try {
-        await this.mailerService.sendMail({
+      // Đẩy job gửi mail vào Background Queue thay vì gửi đồng bộ
+      await this.emailQueue.add(
+        'send-booking-email',
+        {
           to: user.email,
           subject: 'Xác nhận đặt phòng Airbnb thành công',
           html: `
@@ -103,10 +106,16 @@ export class BookingService {
             </ul>
             <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi.</p>
           `,
-        });
-      } catch (error) {
-        console.error('Lỗi khi gửi email xác nhận:', error.message);
-      }
+        },
+        {
+          removeOnComplete: true, // Xóa job khỏi Redis sau khi chạy thành công để tiết kiệm RAM
+          attempts: 3,            // Nếu lỗi SMTP sẽ tự động thử lại tối đa 3 lần
+          backoff: {              // Đợi 5 giây giữa các lần thử lại
+            type: 'fixed',
+            delay: 5000,
+          },
+        }
+      );
     }
 
     return {

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './common/prisma/prisma.module';
@@ -15,12 +16,20 @@ import { RoomModule } from './modules/room/room.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { EMAIL_USER, EMAIL_PASS } from './common/constants/app.constant';
+import { EMAIL_USER, EMAIL_PASS, REDIS_URL } from './common/constants/app.constant';
+
+const redisUrl = new URL(REDIS_URL || 'redis://localhost:6379');
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: redisUrl.hostname,
+        port: Number(redisUrl.port),
+      },
     }),
     MailerModule.forRoot({
       transport: {
