@@ -50,11 +50,11 @@ export class AuthService {
       where: { email: dto.email, isDeleted: false },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+    if (!user || !user.pass_word) {
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.pass_word, user.pass_word!);
+    const isPasswordValid = await bcrypt.compare(dto.pass_word, user.pass_word);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
