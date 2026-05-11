@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { SignupDto } from './dto/signup.dto';
 import { SigninDto } from './dto/signin.dto';
+import { REFRESH_TOKEN_SECRET } from '../../common/constants/app.constant';
 
 @Injectable()
 export class AuthService {
@@ -58,18 +59,55 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT
-    const payload = { id: user.id, email: user.email, role: user.role };
-    const token = this.jwtService.sign(payload);
+    const tokens = await this.generateTokens({ id: user.id, email: user.email, role: user.role });
 
-    const { pass_word, ...userWithoutPassword } = user;
+    const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, 10);
+    await this.prisma.nguoiDung.update({
+      where: { id: user.id },
+      data: { refresh_token: hashedRefreshToken },
+    });
+
+    const { pass_word, refresh_token, ...userWithoutPassword } = user;
 
     return {
       message: 'Signin successful',
-      content: {
-        user: userWithoutPassword,
-        token,
-      },
+      content: { user: userWithoutPassword, ...tokens },
     };
+  }
+
+  private async generateTokens(payload: any) {
+    const accessToken = await this.jwtService.signAsync(payload);
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: REFRESH_TOKEN_SECRET,
+      expiresIn: '7d',
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async refreshToken(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, { secret: REFRESH_TOKEN_SECRET });
+
+      const user = await this.prisma.nguoiDung.findUnique({ where: { id: payload.id } });
+      if (!user || !user.refresh_token) throw new UnauthorizedException();
+
+      const isMatch = await bcrypt.compare(token, user.refresh_token);
+      if (!isMatch) throw new UnauthorizedException();
+
+      const tokens = await this.generateTokens({ id: user.id, email: user.email, role: user.role });
+
+      await this.prisma.nguoiDung.update({
+        where: { id: user.id },
+        data: { refresh_token: await bcrypt.hash(tokens.refreshToken, 10) },
+      });
+
+      return { message: 'Refresh successful', content: tokens };
+    } catch {
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 }

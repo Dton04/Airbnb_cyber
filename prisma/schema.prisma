@@ -49,20 +49,21 @@ model DatPhong {
 }
 
 model NguoiDung {
-  id        Int       @id @default(autoincrement())
-  name      String?   @db.VarChar(255)
-  email     String?   @unique @db.VarChar(255)
-  pass_word String?   @db.VarChar(255)
-  phone     String?   @db.VarChar(20)
-  birth_day String?   @db.VarChar(50)
-  gender    String?   @db.VarChar(20)
-  role      String?   @db.VarChar(50)
-  avatar    String?   @db.VarChar(255)
-  deletedBy Int       @default(0)
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime? @db.Timestamp(6)
-  createdAt DateTime  @default(now()) @db.Timestamp(6)
-  updatedAt DateTime  @default(now()) @updatedAt @db.Timestamp(6)
+  id            Int       @id @default(autoincrement())
+  name          String?   @db.VarChar(255)
+  email         String?   @unique @db.VarChar(255)
+  pass_word     String?   @db.VarChar(255)
+  phone         String?   @db.VarChar(20)
+  birth_day     String?   @db.VarChar(50)
+  gender        String?   @db.VarChar(20)
+  role          String?   @db.VarChar(50)
+  avatar        String?   @db.VarChar(255)
+  refresh_token String?   @db.Text
+  deletedBy     Int       @default(0)
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime? @db.Timestamp(6)
+  createdAt     DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime  @default(now()) @updatedAt @db.Timestamp(6)
 
   BinhLuan BinhLuan[]
   DatPhong DatPhong[]

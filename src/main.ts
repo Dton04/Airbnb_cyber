@@ -2,9 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
+// @ts-ignore
+import cookieParserDefault from 'cookie-parser';
+
+const cp = (cookieParserDefault || cookieParser) as any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(cp());
 
   app.useGlobalPipes(
     new ValidationPipe({
