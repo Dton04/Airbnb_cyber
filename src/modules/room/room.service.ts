@@ -11,7 +11,7 @@ export class RoomService {
     private readonly prisma: PrismaService,
     private readonly cloudinaryService: CloudinaryService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-  ) {}
+  ) { }
 
   private mapToResponse(phong: any) {
     if (!phong) return phong;
@@ -46,6 +46,10 @@ export class RoomService {
   }
 
   async create(dto: CreateRoomDto) {
+    if (dto.maViTri !== undefined) {
+      const viTri = await this.prisma.viTri.findFirst({ where: { id: dto.maViTri, isDeleted: false } });
+      if (!viTri) throw new NotFoundException('Vị trí không tồn tại');
+    }
     const newRoom = await this.prisma.phong.create({
       data: {
         ten_phong: dto.tenPhong,
@@ -67,7 +71,7 @@ export class RoomService {
         ma_vi_tri: dto.maViTri,
       },
     });
-    
+
     await this.cacheManager.del('rooms_list');
     return this.mapToResponse(newRoom);
   }
@@ -82,7 +86,7 @@ export class RoomService {
   async paginateAndSearch(pageIndex: number, pageSize: number, keyword: string) {
     const skip = (pageIndex - 1) * pageSize;
     const whereCondition: any = { isDeleted: false };
-    
+
     if (keyword) {
       whereCondition.ten_phong = { contains: keyword };
     }
@@ -163,7 +167,7 @@ export class RoomService {
     if (!room) throw new NotFoundException('Room not found');
 
     const uploadResult = await this.cloudinaryService.uploadFile(file, 'airbnb/rooms');
-    
+
     const updatedRoom = await this.prisma.phong.update({
       where: { id },
       data: { hinh_anh: uploadResult.url },

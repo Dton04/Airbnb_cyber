@@ -36,7 +36,7 @@ export class AuthService {
       },
     });
 
-    const { pass_word, ...userWithoutPassword } = newUser;
+    const { pass_word: _, ...userWithoutPassword } = newUser;
 
 
     return {
