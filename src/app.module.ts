@@ -20,6 +20,9 @@ import { EMAIL_USER, EMAIL_PASS, REDIS_URL } from './common/constants/app.consta
 
 const redisUrl = new URL(REDIS_URL || 'redis://localhost:6379');
 
+const isUpstash = redisUrl.hostname.includes('upstash.io');
+const isTls = isUpstash || redisUrl.protocol === 'rediss:';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,6 +32,9 @@ const redisUrl = new URL(REDIS_URL || 'redis://localhost:6379');
       connection: {
         host: redisUrl.hostname,
         port: Number(redisUrl.port),
+        username: redisUrl.username,
+        password: redisUrl.password,
+        tls: isTls ? {} : undefined,
       },
     }),
     MailerModule.forRoot({
