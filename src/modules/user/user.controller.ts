@@ -7,6 +7,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SearchUserDto } from './dto/search-user.dto';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @ApiTags('NguoiDung')
 @Controller('api/users')
@@ -14,9 +16,9 @@ export class UserController {
   constructor(private readonly userService: UserService) { }
 
   @Get()
-  // @UseInterceptors(CacheInterceptor)
-  // @CacheKey('users_list')
-  // @CacheTTL(60000) // cache cho 60 giây
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('users_list')
+  @CacheTTL(60000) // cache cho 60 giây
   @ApiOperation({ summary: 'Lấy danh sách người dùng' })
   findAll() {
     return this.userService.findAll();
@@ -24,7 +26,8 @@ export class UserController {
 
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Thêm người dùng mới' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -32,7 +35,8 @@ export class UserController {
 
   @Delete()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Xóa người dùng' })
   remove(@Query('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);

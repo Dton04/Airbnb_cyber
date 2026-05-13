@@ -39,6 +39,9 @@ export class CommentService {
 
   async findAll() {
     const comments = await this.prisma.binhLuan.findMany({
+      where: {
+        isDeleted: false
+      },
       include: {
         Phong: {
           select: {

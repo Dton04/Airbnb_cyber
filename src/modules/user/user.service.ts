@@ -13,7 +13,21 @@ export class UserService {
    ) { }
 
    async findAll() {
-      return this.prisma.nguoiDung.findMany();
+      return this.prisma.nguoiDung.findMany({
+         where: {
+            isDeleted: false,
+         },
+         select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            birth_day: true,
+            gender: true,
+            role: true,
+            avatar: true,
+         },
+      });
    }
 
    async create(dto: CreateUserDto) {
