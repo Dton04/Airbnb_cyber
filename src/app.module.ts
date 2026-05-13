@@ -34,7 +34,8 @@ const isTls = isUpstash || redisUrl.protocol === 'rediss:';
         port: Number(redisUrl.port),
         username: redisUrl.username,
         password: redisUrl.password,
-        tls: isTls ? {} : undefined,
+        tls: isTls ? { rejectUnauthorized: false } : undefined,
+        family: 0,
       },
     }),
     MailerModule.forRoot({
