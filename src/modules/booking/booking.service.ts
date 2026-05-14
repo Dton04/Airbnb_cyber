@@ -133,6 +133,7 @@ export class BookingService {
   }
 
   async update(id: number, dto: UpdateBookingDto, reqUser: any) {
+    // 1. Check booking tồn tại
     const booking = await this.prisma.datPhong.findFirst({
       where: {
         id,
@@ -144,6 +145,7 @@ export class BookingService {
       throw new NotFoundException('Đặt phòng không tồn tại');
     }
 
+    // 2. Check quyền
     const isOwner = booking.ma_nguoi_dat === reqUser.id;
     const isAdmin = reqUser.role === 'ADMIN';
 
@@ -153,6 +155,8 @@ export class BookingService {
       );
     }
 
+    // 3. Lấy dữ liệu mới sau update
+    const maPhong = dto.maPhong ?? booking.ma_phong;
 
     const ngayDen: Date = dto.ngayDen
       ? new Date(dto.ngayDen)
@@ -162,47 +166,92 @@ export class BookingService {
       ? new Date(dto.ngayDi)
       : booking.ngay_di!;
 
+    const soLuongKhach =
+      dto.soLuongKhach ?? booking.so_luong_khach;
+
+    // 4. Validate date invalid
+    if (isNaN(ngayDen.getTime()) || isNaN(ngayDi.getTime())) {
+      throw new BadRequestException('Ngày không hợp lệ');
+    }
+
+    // 5. Validate ngày
     if (ngayDen >= ngayDi) {
       throw new BadRequestException(
         'Ngày đi phải lớn hơn ngày đến',
       );
     }
-    if (dto.maPhong) {
-      const room = await this.prisma.phong.findUnique({
-        where: { id: dto.maPhong },
-      });
 
-      if (!room) {
-        throw new NotFoundException('Phòng không tồn tại');
-      }
+    // 6. Check phòng tồn tại
+    const room = await this.prisma.phong.findFirst({
+      where: {
+        id: maPhong!,
+        isDeleted: false,
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Phòng không tồn tại');
     }
 
-    const dataToUpdate: any = {};
-
-    if (dto.maPhong !== undefined) {
-      dataToUpdate.ma_phong = dto.maPhong;
+    // 7. Validate số lượng khách
+    if (soLuongKhach! > room.khach!) {
+      throw new BadRequestException(
+        `Phòng chỉ cho tối đa ${room.khach} khách`,
+      );
     }
 
-    if (dto.ngayDen !== undefined) {
-      dataToUpdate.ngay_den = ngayDen;
+    // 8. Check phòng bị trùng lịch
+    const conflictBooking = await this.prisma.datPhong.findFirst({
+      where: {
+        id: {
+          not: id,
+        },
+
+        ma_phong: maPhong,
+
+        isDeleted: false,
+
+        AND: [
+          {
+            ngay_den: {
+              lt: ngayDi,
+            },
+          },
+          {
+            ngay_di: {
+              gt: ngayDen,
+            },
+          },
+        ],
+      },
+    });
+
+    if (conflictBooking) {
+      throw new BadRequestException(
+        'Phòng đã được đặt trong khoảng thời gian này',
+      );
     }
 
-    if (dto.ngayDi !== undefined) {
-      dataToUpdate.ngay_di = ngayDi;
+    // 9. Không cho update rỗng
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException(
+        'Không có dữ liệu để cập nhật',
+      );
     }
 
-    if (dto.soLuongKhach !== undefined) {
-      dataToUpdate.so_luong_khach = dto.soLuongKhach;
-    }
-
+    // 10. Update
     const updatedBooking = await this.prisma.datPhong.update({
       where: { id },
-      data: dataToUpdate,
+      data: {
+        ma_phong: maPhong,
+        ngay_den: ngayDen,
+        ngay_di: ngayDi,
+        so_luong_khach: soLuongKhach,
+      },
     });
 
     return this.mapToResponse(updatedBooking);
   }
-
   async remove(id: number) {
     const booking = await this.prisma.datPhong.findFirst({ where: { id, isDeleted: false } });
     if (!booking) throw new NotFoundException('Đặt phòng không tồn tại');
