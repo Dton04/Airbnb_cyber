@@ -87,35 +87,31 @@ export class BookingService {
       where: { id: reqUser.id }
     });
 
+    // Fire-and-forget: không await để không block response trả về client
     if (user?.email) {
-      // Đẩy job gửi mail vào Background Queue thay vì gửi đồng bộ
-      await this.emailQueue.add(
-        'send-booking-email',
-        {
-          to: user.email,
-          subject: 'Xác nhận đặt phòng Airbnb thành công',
-          html: `
-            <h2>Xin chào ${user.name || 'bạn'},</h2>
-            <p>Bạn đã đặt phòng <strong>${phong.ten_phong}</strong> thành công trên hệ thống Airbnb!</p>
-            <ul>
-              <li><strong>Ngày đến:</strong> ${new Date(ngayDen).toLocaleDateString('vi-VN')}</li>
-              <li><strong>Ngày đi:</strong> ${new Date(ngayDi).toLocaleDateString('vi-VN')}</li>
-              <li><strong>Số khách:</strong> ${soLuongKhach} người</li>
-              <li><strong>Tổng giá dự kiến:</strong> ${phong.gia_tien ? phong.gia_tien + ' $' : 'Liên hệ'} / đêm</li>
-            </ul>
-            <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi.</p>
-          `,
-        },
-        {
-          removeOnComplete: true, // Xóa job khỏi Redis sau khi chạy thành công để tiết kiệm RAM
-          attempts: 3,            // Nếu lỗi SMTP sẽ tự động thử lại tối đa 3 lần
-          backoff: {              // Đợi 5 giây giữa các lần thử lại
-            type: 'fixed',
-            delay: 5000,
-          },
-        }
-      );
+      setImmediate(() => {
+        this.emailQueue
+          .add('send-booking-email', {
+            to: user.email,
+            subject: 'Xác nhận đặt phòng Airbnb thành công',
+            html: `
+              <h2>Xin chào ${user.name || 'bạn'},</h2>
+              <p>Bạn đã đặt phòng <strong>${phong.ten_phong}</strong> thành công trên hệ thống Airbnb!</p>
+              <ul>
+                <li><strong>Ngày đến:</strong> ${new Date(ngayDen).toLocaleDateString('vi-VN')}</li>
+                <li><strong>Ngày đi:</strong> ${new Date(ngayDi).toLocaleDateString('vi-VN')}</li>
+                <li><strong>Số khách:</strong> ${soLuongKhach} người</li>
+                <li><strong>Tổng giá dự kiến:</strong> ${phong.gia_tien ? phong.gia_tien + ' $' : 'Liên hệ'} / đêm</li>
+              </ul>
+              <p>Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi.</p>
+            `,
+          })
+          .catch((err) =>
+            console.error('[BullMQ] Failed to enqueue email job:', err?.message),
+          );
+      });
     }
+
 
     return {
       message: 'Đặt phòng thành công',
@@ -133,7 +129,6 @@ export class BookingService {
   }
 
   async update(id: number, dto: UpdateBookingDto, reqUser: any) {
-    // 1. Check booking tồn tại
     const booking = await this.prisma.datPhong.findFirst({
       where: {
         id,
@@ -145,7 +140,6 @@ export class BookingService {
       throw new NotFoundException('Đặt phòng không tồn tại');
     }
 
-    // 2. Check quyền
     const isOwner = booking.ma_nguoi_dat === reqUser.id;
     const isAdmin = reqUser.role === 'ADMIN';
 
@@ -155,7 +149,6 @@ export class BookingService {
       );
     }
 
-    // 3. Lấy dữ liệu mới sau update
     const maPhong = dto.maPhong ?? booking.ma_phong;
 
     const ngayDen: Date = dto.ngayDen
@@ -169,19 +162,17 @@ export class BookingService {
     const soLuongKhach =
       dto.soLuongKhach ?? booking.so_luong_khach;
 
-    // 4. Validate date invalid
     if (isNaN(ngayDen.getTime()) || isNaN(ngayDi.getTime())) {
       throw new BadRequestException('Ngày không hợp lệ');
     }
 
-    // 5. Validate ngày
     if (ngayDen >= ngayDi) {
       throw new BadRequestException(
         'Ngày đi phải lớn hơn ngày đến',
       );
     }
 
-    // 6. Check phòng tồn tại
+
     const room = await this.prisma.phong.findFirst({
       where: {
         id: maPhong!,
@@ -193,14 +184,12 @@ export class BookingService {
       throw new NotFoundException('Phòng không tồn tại');
     }
 
-    // 7. Validate số lượng khách
     if (soLuongKhach! > room.khach!) {
       throw new BadRequestException(
         `Phòng chỉ cho tối đa ${room.khach} khách`,
       );
     }
 
-    // 8. Check phòng bị trùng lịch
     const conflictBooking = await this.prisma.datPhong.findFirst({
       where: {
         id: {
