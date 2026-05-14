@@ -43,8 +43,11 @@ export class BookingController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Cập nhật đặt phòng' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateBookingDto: UpdateBookingDto, @Request() req) {
-    return this.bookingService.update(id, updateBookingDto, req.user.id);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBookingDto: UpdateBookingDto,
+    @Request() req) {
+    return this.bookingService.update(id, updateBookingDto, req.user);
   }
 
   @Delete(':id')

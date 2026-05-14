@@ -43,11 +43,21 @@ const isTls = isUpstash || redisUrl.protocol === 'rediss:';
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
+
         auth: {
           user: EMAIL_USER,
           pass: EMAIL_PASS,
         },
+        // FIX SPEED
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100,
+
+        // optional
+        rateDelta: 1000,
+        rateLimit: 5,
       },
+
       defaults: {
         from: '"Airbnb Clone" <noreply@airbnb-clone.com>',
       },

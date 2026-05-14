@@ -1,13 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class UpdateCommentDto {
-   @ApiProperty()
-   @ApiProperty({ example: 'Nội dung cập nhật' })
-   noiDung: string;
+  @ApiProperty({ example: 'Nội dung cập nhật', required: false })
+  @IsOptional()
+  @IsString()
+  noiDung?: string;
 
-   @ApiProperty({ example: 4 })
-   @Min(1)
-   @Max(5)
-   saoBinhLuan: number;
+  @ApiProperty({ example: 4, required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  saoBinhLuan?: number;
 }
+

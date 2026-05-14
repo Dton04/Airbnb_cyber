@@ -83,7 +83,6 @@ export class BookingService {
       },
     });
 
-    // Lấy thông tin user để gửi mail
     const user = await this.prisma.nguoiDung.findUnique({
       where: { id: reqUser.id }
     });
@@ -134,26 +133,74 @@ export class BookingService {
   }
 
   async update(id: number, dto: UpdateBookingDto, reqUser: any) {
-    const booking = await this.prisma.datPhong.findFirst({ where: { id, isDeleted: false } });
-    if (!booking) throw new NotFoundException('Đặt phòng không tồn tại');
+    const booking = await this.prisma.datPhong.findFirst({
+      where: {
+        id,
+        isDeleted: false,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Đặt phòng không tồn tại');
+    }
+
+    const isOwner = booking.ma_nguoi_dat === reqUser.id;
+    const isAdmin = reqUser.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
+      throw new UnauthorizedException(
+        'Bạn không có quyền chỉnh sửa đặt phòng này',
+      );
+    }
+
+
+    const ngayDen: Date = dto.ngayDen
+      ? new Date(dto.ngayDen)
+      : booking.ngay_den!;
+
+    const ngayDi: Date = dto.ngayDi
+      ? new Date(dto.ngayDi)
+      : booking.ngay_di!;
+
+    if (ngayDen >= ngayDi) {
+      throw new BadRequestException(
+        'Ngày đi phải lớn hơn ngày đến',
+      );
+    }
+    if (dto.maPhong) {
+      const room = await this.prisma.phong.findUnique({
+        where: { id: dto.maPhong },
+      });
+
+      if (!room) {
+        throw new NotFoundException('Phòng không tồn tại');
+      }
+    }
 
     const dataToUpdate: any = {};
-    if (dto.maPhong !== undefined) dataToUpdate.ma_phong = dto.maPhong;
-    if (dto.ngayDen !== undefined) dataToUpdate.ngay_den = new Date(dto.ngayDen);
-    if (dto.ngayDi !== undefined) dataToUpdate.ngay_di = new Date(dto.ngayDi);
-    if (dto.soLuongKhach !== undefined) dataToUpdate.so_luong_khach = dto.soLuongKhach;
 
-    if (reqUser.role === 'ADMIN' || booking.ma_nguoi_dat === reqUser.id) {
-      const updatedBooking = await this.prisma.datPhong.update({
-        where: { id },
-        data: dataToUpdate,
-      });
-      return this.mapToResponse(updatedBooking);
-    }
-    else {
-      throw new UnauthorizedException('Bạn không có quyền chỉnh sửa đặt phòng này');
+    if (dto.maPhong !== undefined) {
+      dataToUpdate.ma_phong = dto.maPhong;
     }
 
+    if (dto.ngayDen !== undefined) {
+      dataToUpdate.ngay_den = ngayDen;
+    }
+
+    if (dto.ngayDi !== undefined) {
+      dataToUpdate.ngay_di = ngayDi;
+    }
+
+    if (dto.soLuongKhach !== undefined) {
+      dataToUpdate.so_luong_khach = dto.soLuongKhach;
+    }
+
+    const updatedBooking = await this.prisma.datPhong.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    return this.mapToResponse(updatedBooking);
   }
 
   async remove(id: number) {
