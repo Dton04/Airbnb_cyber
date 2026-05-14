@@ -298,8 +298,8 @@ Dự án được deploy tự động lên **Render** khi push lên nhánh `main
 
 ## 👨‍💻 Tác giả
 
-**Tôn Đạt** — Học viên Cybersoft  
-📧 tondat0811vn@gmail.com  
+**Tấn Đạt** — Học viên Cybersoft  
+📧 tandat081104@gmail.com  
 🐙 GitHub: [github.com/Dton04](https://github.com/Dton04)
 
 ---
