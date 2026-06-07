@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { LocationController } from './location.controller';
-import { LocationService } from './location.service';
-import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
-import { PrismaModule } from 'src/common/prisma/prisma.module';
+import { LocationController } from './controllers/location.controller';
+import { LocationService } from './services/location.service';
+import { StorageModule } from '../../core/storage/storage.module';
 
 @Module({
-  imports: [CloudinaryModule, PrismaModule],
+  imports: [StorageModule],
   controllers: [LocationController],
-  providers: [LocationService]
+  providers: [LocationService],
+  exports: [LocationService],
 })
-export class LocationModule { }
+export class LocationModule {}

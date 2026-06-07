@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { BookingController } from './booking.controller';
-import { BookingService } from './booking.service';
-import { BookingProcessor } from './booking.processor';
+import { BookingController } from './controllers/booking.controller';
+import { BookingService } from './services/booking.service';
+import { BookingProcessor } from './processors/booking.processor';
 
 @Module({
   imports: [
@@ -18,6 +18,6 @@ import { BookingProcessor } from './booking.processor';
   ],
   controllers: [BookingController],
   providers: [BookingService, BookingProcessor],
+  exports: [BookingService],
 })
 export class BookingModule {}
-
